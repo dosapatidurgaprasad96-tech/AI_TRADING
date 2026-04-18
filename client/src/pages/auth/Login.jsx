@@ -42,7 +42,7 @@ export const Login = () => {
 
     if (role === 'Admin') navigate('/admin');
     else if (role === 'Employee') navigate('/employee');
-    else navigate('/customer');
+    else navigate('/customer/onboarding');
   };
 
   return (
