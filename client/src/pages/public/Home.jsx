@@ -2,11 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { ArrowUpRight, Activity, TrendingUp, DollarSign } from 'lucide-react';
+import { ArrowUpRight, Activity, TrendingUp, DollarSign, Shield, Zap, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { checkAPIStatus } from '../../services/api';
 
 export const Home = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [apiOnline, setApiOnline] = useState(null);
+
   const [liveTrades, setLiveTrades] = useState([
     { id: 1, pair: 'BTC/USD', amount: '0.45', type: 'Buy', time: 'Just now' },
     { id: 2, pair: 'ETH/USD', amount: '12.4', type: 'Sell', time: '1m ago' },
@@ -15,16 +20,20 @@ export const Home = () => {
   
   const [livePrice, setLivePrice] = useState(65430.50);
 
+  // Check backend health on mount
   useEffect(() => {
-    // Simulate real-time ticking
+    checkAPIStatus()
+      .then(() => setApiOnline(true))
+      .catch(() => setApiOnline(false));
+  }, []);
+
+  useEffect(() => {
     const interval = setInterval(() => {
-      // Fluctuate price slightly
       const change = (Math.random() * 10) - 5;
       setLivePrice(prev => prev + change);
 
-      // Add a random fake trade
       if (Math.random() > 0.6) {
-        const pairs = ['BTC/USD', 'ETH/USD', 'SOL/USD', 'BNB/USD'];
+        const pairs = ['BTC/USD', 'ETH/USD', 'SOL/USD', 'BNB/USD', 'AAPL', 'TSLA'];
         const types = ['Buy', 'Sell'];
         const amount = (Math.random() * 5).toFixed(2);
         const newTrade = {
@@ -37,7 +46,7 @@ export const Home = () => {
         
         setLiveTrades(prev => {
           const updated = [newTrade, ...prev];
-          return updated.slice(0, 5); // Keep last 5
+          return updated.slice(0, 5);
         });
       }
     }, 2000);
@@ -49,6 +58,13 @@ export const Home = () => {
     <div className="space-y-12 pb-12">
       {/* Hero Section */}
       <section className="text-center py-16 px-4">
+        <div className="flex justify-center mb-4">
+          {apiOnline !== null && (
+            <Badge variant={apiOnline ? 'success' : 'danger'} className="px-3 py-1 text-xs">
+              {apiOnline ? '● Backend Connected' : '○ Backend Offline'}
+            </Badge>
+          )}
+        </div>
         <Badge variant="brand" className="mb-6 px-4 py-1 text-sm bg-indigo-100 text-indigo-700">AI-Powered Trading Platform</Badge>
         <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-6">
           Trade Smarter, Not Harder
@@ -57,9 +73,42 @@ export const Home = () => {
           The first trading platform with an embedded AI that automatically pairs you with elite industry traders based exactly on your risk tolerance.
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <Button size="lg" className="h-14 px-8 text-lg font-bold shadow-lg shadow-indigo-500/30" onClick={() => navigate('/register')}>Start Trading Now <ArrowUpRight className="ml-2 w-5 h-5"/></Button>
-          <Button variant="ghost" size="lg" className="h-14 px-8 text-lg font-semibold bg-white border border-gray-200 dark:bg-gray-900 dark:border-gray-800 shadow-sm" onClick={() => navigate('/login')}>Sign In to Dashboard</Button>
+          {user ? (
+            <Button size="lg" className="h-14 px-8 text-lg font-bold shadow-lg shadow-indigo-500/30" onClick={() => navigate('/customer')}>
+              Go to Dashboard <ArrowUpRight className="ml-2 w-5 h-5"/>
+            </Button>
+          ) : (
+            <>
+              <Button size="lg" className="h-14 px-8 text-lg font-bold shadow-lg shadow-indigo-500/30" onClick={() => navigate('/register')}>Start Trading Now <ArrowUpRight className="ml-2 w-5 h-5"/></Button>
+              <Button variant="ghost" size="lg" className="h-14 px-8 text-lg font-semibold bg-white border border-gray-200 dark:bg-gray-900 dark:border-gray-800 shadow-sm" onClick={() => navigate('/login')}>Sign In to Dashboard</Button>
+            </>
+          )}
         </div>
+      </section>
+
+      {/* Stats Row */}
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <Card className="text-center p-6">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 dark:bg-green-900/20 mb-3">
+            <DollarSign className="w-6 h-6 text-green-500" />
+          </div>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">$100K</p>
+          <p className="text-sm text-gray-500 mt-1">Paper Trading Balance</p>
+        </Card>
+        <Card className="text-center p-6">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-900/20 mb-3">
+            <BarChart3 className="w-6 h-6 text-indigo-500" />
+          </div>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">7+</p>
+          <p className="text-sm text-gray-500 mt-1">API Endpoints</p>
+        </Card>
+        <Card className="text-center p-6">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-900/20 mb-3">
+            <Zap className="w-6 h-6 text-purple-500" />
+          </div>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">AI</p>
+          <p className="text-sm text-gray-500 mt-1">Powered Advice (Free)</p>
+        </Card>
       </section>
 
       {/* Real-time Widget Section */}
@@ -104,9 +153,9 @@ export const Home = () => {
         </Card>
 
         <div className="flex flex-col justify-center space-y-8 pl-4">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Experience AI assignments in real-time.</h2>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Full-Stack AI Trading</h2>
           <p className="text-lg text-gray-600 dark:text-gray-400">
-            When you register, you create a custom risk profile. Our frontend simulator will instantly run its logic to find the exact mockup trader match for you.
+            Register to get a paper trading account with $100K. Execute BUY/SELL trades, track your portfolio in real-time, and get AI-powered trading advice — all backed by a secure Express + MongoDB API.
           </p>
           <ul className="space-y-6 pt-2">
             <li className="flex gap-4">
@@ -114,8 +163,17 @@ export const Home = () => {
                  <TrendingUp className="w-6 h-6 text-indigo-500" />
                </div>
                <div>
-                 <strong className="block text-gray-900 dark:text-white text-lg">Advanced Profiles</strong> 
-                 <span className="text-gray-600 dark:text-gray-400 mt-1 block">Differentiates between High, Medium, and Low risk thresholds automatically.</span>
+                 <strong className="block text-gray-900 dark:text-white text-lg">Live Portfolio Tracking</strong> 
+                 <span className="text-gray-600 dark:text-gray-400 mt-1 block">Your wallet, assets, and trade history are stored securely in MongoDB.</span>
+               </div>
+            </li>
+            <li className="flex gap-4">
+               <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl h-fit">
+                 <Shield className="w-6 h-6 text-indigo-500" />
+               </div>
+               <div>
+                 <strong className="block text-gray-900 dark:text-white text-lg">Secure JWT Authentication</strong> 
+                 <span className="text-gray-600 dark:text-gray-400 mt-1 block">Encrypted passwords, token-based sessions, and input validation on every request.</span>
                </div>
             </li>
             <li className="flex gap-4">
@@ -123,8 +181,8 @@ export const Home = () => {
                  <Activity className="w-6 h-6 text-indigo-500" />
                </div>
                <div>
-                 <strong className="block text-gray-900 dark:text-white text-lg">Real-time Dashboard</strong> 
-                 <span className="text-gray-600 dark:text-gray-400 mt-1 block">Watch as traders assign you mock coins and populate your wallet.</span>
+                 <strong className="block text-gray-900 dark:text-white text-lg">AI Trading Advice</strong> 
+                 <span className="text-gray-600 dark:text-gray-400 mt-1 block">Get free AI-powered trade insights via OpenRouter's Gemini Flash model.</span>
                </div>
             </li>
           </ul>

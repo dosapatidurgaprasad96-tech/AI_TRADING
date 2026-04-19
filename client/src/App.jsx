@@ -28,6 +28,7 @@ import { CustomerDashboard } from './pages/customer/CustomerDashboard';
 import { Profile } from './pages/customer/Profile';
 import { Wallet } from './pages/customer/Wallet';
 import { TradeHistory } from './pages/customer/TradeHistory';
+import { Watchlist } from './pages/customer/Watchlist';
 
 const AppLayout = ({ children }) => (
   <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-950 transition-colors">
@@ -71,6 +72,7 @@ function App() {
                   <Route path="/customer/profile" element={<Profile />} />
                   <Route path="/customer/wallet" element={<Wallet />} />
                   <Route path="/customer/history" element={<TradeHistory />} />
+                  <Route path="/customer/watchlist" element={<Watchlist />} />
                 </Route>
 
                 {/* Fallback */}
