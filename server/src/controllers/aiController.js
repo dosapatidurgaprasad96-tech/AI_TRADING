@@ -1,5 +1,5 @@
 const asyncHandler = require('express-async-handler');
-const axios = require('axios');
+const { OpenRouter } = require('@openrouter/sdk');
 
 // @desc    Get AI trading advice / reasoning from OpenRouter
 // @route   POST /api/ai/advice
@@ -13,24 +13,34 @@ Market Data: ${JSON.stringify(marketData)}
 Query: ${query}`;
 
   try {
-    // Using OpenRouter API
-    const response = await axios.post(
-      'https://openrouter.ai/api/v1/chat/completions',
-      {
-        model: 'openrouter/auto', // Auto-selects a working free model
-        messages: [{ role: 'user', content: prompt }],
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'http://localhost:3000', // Update with your actual domain
-          'X-Title': 'AllocateIQ', 
-        },
-      }
-    );
+    const openrouter = new OpenRouter({
+      apiKey: process.env.OPENROUTER_API_KEY
+    });
 
-    const advice = response.data.choices[0].message.content;
+    const stream = await openrouter.chat.send({
+      model: "nvidia/nemotron-3-super-120b-a12b:free",
+      messages: [
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      stream: true
+    });
+
+    let advice = "";
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) {
+        advice += content;
+      }
+      
+      // We can log usage if needed
+      // if (chunk.usage) {
+      //   console.log("\\nReasoning tokens:", chunk.usage.reasoningTokens);
+      // }
+    }
+
     res.json({ advice });
   } catch (error) {
     console.error('Error fetching AI advice:', error?.response?.data || error.message);
@@ -40,3 +50,4 @@ Query: ${query}`;
 });
 
 module.exports = { getTradingAdvice };
+
