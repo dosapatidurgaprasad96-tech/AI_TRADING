@@ -1,45 +1,8 @@
 const User = require('../models/User');
 const Allocation = require('../models/Allocation');
 const { getMatchExplanation } = require('./geminiService');
-
-const calculateMatchScore = (trader, client) => {
-  let score = 0;
-
-  // 1. Experience Match (30 pts)
-  // High complexity (8-10) needs Senior/Expert
-  // Medium complexity (4-7) needs Mid/Senior
-  // Low complexity (1-3) can take Junior
-  if (client.complexity >= 8) {
-    if (trader.level === 'Expert') score += 30;
-    else if (trader.level === 'Senior') score += 20;
-    else if (trader.level === 'Mid') score += 10;
-  } else if (client.complexity >= 4) {
-    if (trader.level === 'Senior') score += 30;
-    else if (trader.level === 'Mid') score += 25;
-    else if (trader.level === 'Expert') score += 20;
-    else score += 5;
-  } else {
-    if (trader.level === 'Junior') score += 30;
-    else if (trader.level === 'Mid') score += 20;
-    else score += 10;
-  }
-
-  // 2. Skill Match (25 pts)
-  if (trader.specialization.includes(client.preferredSpecialization)) {
-    score += 25;
-  }
-
-  // 3. Performance Score (25 pts)
-  score += (trader.performanceScore / 100) * 25;
-
-  // 4. Workload Penalty (-20 pts)
-  const loadPercentage = (trader.currentLoad / trader.capacity) * 100;
-  if (loadPercentage > 85) score -= 20;
-  else if (loadPercentage > 60) score -= 10;
-  else if (loadPercentage > 30) score -= 5;
-
-  return Math.max(0, Math.min(100, Math.round(score)));
-};
+const { calculateMatchScore } = require('./scoringService');
+const { getWorkloadPenalty, isOverloaded } = require('./workloadService');
 
 const runAutoAllocation = async () => {
   const unassignedClients = await User.find({ role: 'Customer', assignedTraderId: null });
@@ -56,10 +19,12 @@ const runAutoAllocation = async () => {
     let highestScore = -1;
 
     for (const trader of availableTraders) {
-      // Skip if trader is at max capacity
       if (trader.currentLoad >= trader.capacity) continue;
 
-      const score = calculateMatchScore(trader, client);
+      let score = calculateMatchScore(trader, client);
+      score -= getWorkloadPenalty(trader);
+      score = Math.max(0, score);
+
       if (score > highestScore) {
         highestScore = score;
         bestTrader = trader;
@@ -67,7 +32,6 @@ const runAutoAllocation = async () => {
     }
 
     if (bestTrader) {
-      // Create Allocation
       const explanation = await getMatchExplanation(bestTrader, client, highestScore);
       
       const allocation = await Allocation.create({
@@ -77,11 +41,9 @@ const runAutoAllocation = async () => {
         aiExplanation: explanation
       });
 
-      // Update Client
       client.assignedTraderId = bestTrader._id;
       await client.save();
 
-      // Update Trader
       bestTrader.currentLoad += 1;
       await bestTrader.save();
 
@@ -96,4 +58,55 @@ const runAutoAllocation = async () => {
   return results;
 };
 
-module.exports = { runAutoAllocation };
+// Feature 3: Real-Time Reallocation Triggers
+const checkReallocations = async () => {
+  const activeAllocations = await Allocation.find({ status: 'Active' })
+    .populate('clientId')
+    .populate('traderId');
+    
+  const triggers = [];
+
+  for (const alloc of activeAllocations) {
+    const client = alloc.clientId;
+    const trader = alloc.traderId;
+    
+    if (!client || !trader) continue;
+
+    // Trigger: Workload Breach
+    if (isOverloaded(trader)) {
+      triggers.push({
+        type: 'Workload Breach',
+        clientId: client._id,
+        clientName: client.name,
+        currentTrader: trader.name,
+        reason: 'Trader at >85% capacity'
+      });
+    }
+
+    // Trigger: Performance Drop
+    if (trader.performanceScore < 60) {
+      triggers.push({
+        type: 'Performance Drop',
+        clientId: client._id,
+        clientName: client.name,
+        currentTrader: trader.name,
+        reason: `Trader performance score (${trader.performanceScore}) is below threshold.`
+      });
+    }
+
+    // Trigger: Skill Mismatch
+    if (trader.specialization && !trader.specialization.includes(client.preferredSpecialization)) {
+      triggers.push({
+        type: 'Skill Mismatch',
+        clientId: client._id,
+        clientName: client.name,
+        currentTrader: trader.name,
+        reason: `Trader is not specialized in ${client.preferredSpecialization}.`
+      });
+    }
+  }
+
+  return triggers;
+};
+
+module.exports = { runAutoAllocation, checkReallocations };
