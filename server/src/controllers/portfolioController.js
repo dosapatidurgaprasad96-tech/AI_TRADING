@@ -24,7 +24,7 @@ const getPortfolio = asyncHandler(async (req, res) => {
 // @route   POST /api/portfolio/deposit
 // @access  Private
 const depositFunds = asyncHandler(async (req, res) => {
-  const { amount } = req.body;
+  const { amount, paymentMode = 'Bank Transfer' } = req.body;
   
   if (!amount || isNaN(amount) || amount <= 0) {
     res.status(400);
@@ -40,7 +40,8 @@ const depositFunds = asyncHandler(async (req, res) => {
       totalBalance: 100000 + Number(amount),
       transactions: [{
         type: 'deposit',
-        amount: Number(amount)
+        amount: Number(amount),
+        paymentMode
       }]
     });
   } else {
@@ -50,7 +51,8 @@ const depositFunds = asyncHandler(async (req, res) => {
     portfolio.totalBalance += Number(amount);
     portfolio.transactions.push({
       type: 'deposit',
-      amount: Number(amount)
+      amount: Number(amount),
+      paymentMode
     });
     await portfolio.save();
   }
@@ -66,7 +68,7 @@ const depositFunds = asyncHandler(async (req, res) => {
 // @route   POST /api/portfolio/withdraw
 // @access  Private
 const withdrawFunds = asyncHandler(async (req, res) => {
-  const { amount } = req.body;
+  const { amount, paymentMode = 'Bank Transfer' } = req.body;
   
   if (!amount || isNaN(amount) || amount <= 0) {
     res.status(400);
@@ -90,7 +92,8 @@ const withdrawFunds = asyncHandler(async (req, res) => {
   portfolio.totalBalance -= Number(amount);
   portfolio.transactions.push({
     type: 'withdraw',
-    amount: Number(amount)
+    amount: Number(amount),
+    paymentMode
   });
   await portfolio.save();
 

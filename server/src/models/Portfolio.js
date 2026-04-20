@@ -14,10 +14,11 @@ const portfolioSchema = new mongoose.Schema({
   }],
   totalBalance: { type: Number, default: 100000 }, // Default paper trading balance
   transactions: [{
-    type: { type: String, enum: ['deposit', 'withdraw'], required: true },
+    type: { type: String, enum: ['deposit', 'withdraw', 'buy', 'sell'], required: true },
     amount: { type: Number, required: true },
     date: { type: Date, default: Date.now },
-    status: { type: String, default: 'Completed' }
+    status: { type: String, default: 'Completed' },
+    paymentMode: { type: String, default: 'Bank Transfer' }
   }]
 }, { timestamps: true });
 

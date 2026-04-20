@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useAppData } from '../../context/AppDataContext';
-import { ArrowUpRight, ArrowDownRight, Wallet as WalletIcon, CreditCard, Activity } from 'lucide-react';
-import { getPortfolio, depositPortfolio, withdrawPortfolio } from '../../services/api';
+import { ArrowUpRight, ArrowDownRight, Wallet as WalletIcon, CreditCard, Activity, Briefcase } from 'lucide-react';
+import { getPortfolio, depositPortfolio, withdrawPortfolio, executeTrade, getMarketQuote } from '../../services/api';
+import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
 
 export const Wallet = () => {
   const { user } = useAuth();
@@ -11,6 +14,19 @@ export const Wallet = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('deposit');
+  const [modalAmount, setModalAmount] = useState('');
+  const [paymentMode, setPaymentMode] = useState('Bank Transfer');
+
+  // Trade state
+  const [tradeSymbol, setTradeSymbol] = useState('');
+  const [tradeQty, setTradeQty] = useState(1);
+  const [tradeType, setTradeType] = useState('BUY');
+  const [tradeMessage, setTradeMessage] = useState({ text: '', type: '' });
+  const [tradeLoading, setTradeLoading] = useState(false);
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -29,29 +45,35 @@ export const Wallet = () => {
     }
   }, [user]);
 
-  const handleAction = async (type) => {
-    const amountStr = window.prompt(`Enter amount to ${type}:`);
-    if (!amountStr) return;
-    const amount = Number(amountStr);
-    if (isNaN(amount) || amount <= 0) {
+  const handleAction = (type) => {
+    setModalType(type);
+    setModalAmount('');
+    setPaymentMode('Bank Transfer');
+    setModalOpen(true);
+  };
+
+  const handleModalSubmit = async (e) => {
+    e.preventDefault();
+    const amount = Number(modalAmount);
+    if (!amount || amount <= 0) {
       alert('Invalid amount');
       return;
     }
     
     setActionLoading(true);
     try {
-      if (type === 'deposit') {
-        const data = await depositPortfolio(user.token, amount);
+      if (modalType === 'deposit') {
+        const data = await depositPortfolio(user.token, amount, paymentMode);
         setBalance(data.totalBalance);
         if (data.transactions) setTransactions(data.transactions);
       } else {
-        const data = await withdrawPortfolio(user.token, amount);
+        const data = await withdrawPortfolio(user.token, amount, paymentMode);
         setBalance(data.totalBalance);
         if (data.transactions) setTransactions(data.transactions);
       }
-      alert(`${type.charAt(0).toUpperCase() + type.slice(1)} successful!`);
+      setModalOpen(false);
     } catch (err) {
-      alert(err.message || `Failed to ${type}`);
+      alert(err.message || `Failed to ${modalType}`);
     } finally {
       setActionLoading(false);
     }
@@ -64,6 +86,46 @@ export const Wallet = () => {
 
   // Sort transactions (newest first)
   const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const handleTrade = async (e) => {
+    e.preventDefault();
+    if (!tradeSymbol || tradeQty <= 0) return;
+    
+    setTradeLoading(true);
+    setTradeMessage({ text: '', type: '' });
+
+    try {
+      // 1. Get current market price
+      const quote = await getMarketQuote(user.token, tradeSymbol.toUpperCase());
+      if (!quote || !quote.price) throw new Error('Could not fetch market price for symbol');
+      
+      const price = quote.price;
+
+      // 2. Execute trade
+      await executeTrade(user.token, {
+        symbol: tradeSymbol.toUpperCase(),
+        type: tradeType,
+        quantity: tradeQty,
+        price: price,
+        decisionReasoning: 'Manual quick trade from wallet'
+      });
+      
+      setTradeMessage({ text: `${tradeType} ${tradeQty} ${tradeSymbol.toUpperCase()} at $${price.toFixed(2)} successful!`, type: 'success' });
+      
+      // Refresh portfolio balance
+      const data = await getPortfolio(user.token);
+      setBalance(data.totalBalance);
+      setTransactions(data.transactions || []);
+      
+      // Reset form
+      setTradeSymbol('');
+      setTradeQty(1);
+    } catch (err) {
+      setTradeMessage({ text: err.message || `Failed to execute ${tradeType}`, type: 'error' });
+    } finally {
+      setTradeLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -132,6 +194,66 @@ export const Wallet = () => {
               <span className="text-sm font-bold text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Withdraw</span>
             </button>
           </div>
+
+          {/* Quick Trade Widget */}
+          <Card className="mt-6 border border-gray-200 dark:border-gray-800">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Briefcase className="w-5 h-5 text-indigo-500" /> Quick Trade
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleTrade} className="space-y-4">
+                {tradeMessage.text && (
+                  <div className={`p-2 text-xs rounded ${tradeMessage.type === 'success' ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400' : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'}`}>
+                    {tradeMessage.text}
+                  </div>
+                )}
+                
+                <div className="flex gap-2">
+                  <button 
+                    type="button" 
+                    onClick={() => setTradeType('BUY')}
+                    className={`flex-1 py-1.5 text-sm font-semibold rounded-lg transition-colors ${tradeType === 'BUY' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                  >
+                    Buy
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setTradeType('SELL')}
+                    className={`flex-1 py-1.5 text-sm font-semibold rounded-lg transition-colors ${tradeType === 'SELL' ? 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                  >
+                    Sell
+                  </button>
+                </div>
+
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <Input 
+                      placeholder="Symbol (e.g. AAPL)" 
+                      value={tradeSymbol}
+                      onChange={(e) => setTradeSymbol(e.target.value.toUpperCase())}
+                      required
+                    />
+                  </div>
+                  <div className="w-24">
+                    <Input 
+                      type="number" 
+                      min="1" 
+                      placeholder="Qty" 
+                      value={tradeQty}
+                      onChange={(e) => setTradeQty(Number(e.target.value))}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <Button type="submit" className="w-full text-sm h-9" disabled={tradeLoading}>
+                  {tradeLoading ? 'Checking Market...' : `Execute ${tradeType}`}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Right Column: Transactions */}
@@ -159,22 +281,29 @@ export const Wallet = () => {
                       <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${
                         tx.type === 'deposit' 
                           ? 'bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400' 
-                          : 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                          : tx.type === 'withdraw'
+                            ? 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
+                            : tx.type === 'buy'
+                              ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
+                              : 'bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400'
                       }`}>
-                        {tx.type === 'deposit' ? <ArrowDownRight className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
+                        {(tx.type === 'deposit' || tx.type === 'sell') ? <ArrowDownRight className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
                       </div>
                       <div>
                         <h4 className="font-bold text-gray-900 dark:text-gray-100 capitalize">
-                          {tx.type === 'deposit' ? 'Trader Allocation' : 'Withdrawal Request'}
+                          {tx.type === 'deposit' ? 'Trader Allocation' : tx.type === 'withdraw' ? 'Withdrawal Request' : tx.type === 'buy' ? 'Asset Purchase' : 'Asset Sale'}
                         </h4>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{formatDate(tx.date)}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {formatDate(tx.date)}
+                          {tx.paymentMode && (tx.type === 'deposit' || tx.type === 'withdraw') && ` • via ${tx.paymentMode}`}
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className={`font-mono font-bold text-lg ${
-                        tx.type === 'deposit' ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-gray-100'
+                        (tx.type === 'deposit' || tx.type === 'sell') ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                       }`}>
-                        {tx.type === 'deposit' ? '+' : '-'}${tx.amount.toFixed(2)}
+                        {(tx.type === 'deposit' || tx.type === 'sell') ? '+' : '-'}${tx.amount.toFixed(2)}
                       </div>
                       <p className="text-xs font-semibold text-gray-400 dark:text-gray-500">{tx.status}</p>
                     </div>
@@ -185,6 +314,54 @@ export const Wallet = () => {
           </div>
         </div>
       </div>
+
+      {/* Transaction Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <h3 className="text-xl font-bold mb-4 capitalize text-gray-900 dark:text-white">
+                {modalType} Funds
+              </h3>
+              <form onSubmit={handleModalSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Amount ($)</label>
+                  <Input 
+                    type="number" 
+                    min="1" 
+                    placeholder="e.g. 500" 
+                    value={modalAmount}
+                    onChange={(e) => setModalAmount(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Payment Mode</label>
+                  <select 
+                    value={paymentMode}
+                    onChange={(e) => setPaymentMode(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 dark:text-white"
+                  >
+                    <option value="Bank Transfer">Bank Transfer</option>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Debit Card">Debit Card</option>
+                    <option value="Crypto Wallet">Crypto Wallet</option>
+                    <option value="PayPal">PayPal</option>
+                  </select>
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <Button type="button" variant="ghost" className="flex-1" onClick={() => setModalOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="flex-1" disabled={actionLoading}>
+                    {actionLoading ? 'Processing...' : 'Confirm'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
