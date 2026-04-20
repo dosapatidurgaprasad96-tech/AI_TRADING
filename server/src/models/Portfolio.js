@@ -13,6 +13,12 @@ const portfolioSchema = new mongoose.Schema({
     averagePrice: { type: Number, required: true, min: 0 },
   }],
   totalBalance: { type: Number, default: 100000 }, // Default paper trading balance
+  transactions: [{
+    type: { type: String, enum: ['deposit', 'withdraw'], required: true },
+    amount: { type: Number, required: true },
+    date: { type: Date, default: Date.now },
+    status: { type: String, default: 'Completed' }
+  }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Portfolio', portfolioSchema);

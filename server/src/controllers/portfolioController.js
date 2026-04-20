@@ -12,7 +12,8 @@ const getPortfolio = asyncHandler(async (req, res) => {
     portfolio = await Portfolio.create({
       user: req.user._id,
       assets: [],
-      totalBalance: 100000 // Default balance
+      totalBalance: 100000, // Default balance
+      transactions: []
     });
   }
 
@@ -36,16 +37,28 @@ const depositFunds = asyncHandler(async (req, res) => {
     portfolio = await Portfolio.create({
       user: req.user._id,
       assets: [],
-      totalBalance: 100000 + Number(amount)
+      totalBalance: 100000 + Number(amount),
+      transactions: [{
+        type: 'deposit',
+        amount: Number(amount)
+      }]
     });
   } else {
+    // Create transactions array if it doesn't exist
+    if (!portfolio.transactions) portfolio.transactions = [];
+    
     portfolio.totalBalance += Number(amount);
+    portfolio.transactions.push({
+      type: 'deposit',
+      amount: Number(amount)
+    });
     await portfolio.save();
   }
 
   res.json({ 
     message: 'Deposit successful', 
-    totalBalance: portfolio.totalBalance 
+    totalBalance: portfolio.totalBalance,
+    transactions: portfolio.transactions
   });
 });
 
@@ -72,12 +85,19 @@ const withdrawFunds = asyncHandler(async (req, res) => {
     throw new Error('Insufficient funds');
   }
 
+  if (!portfolio.transactions) portfolio.transactions = [];
+
   portfolio.totalBalance -= Number(amount);
+  portfolio.transactions.push({
+    type: 'withdraw',
+    amount: Number(amount)
+  });
   await portfolio.save();
 
   res.json({ 
     message: 'Withdrawal successful', 
-    totalBalance: portfolio.totalBalance 
+    totalBalance: portfolio.totalBalance,
+    transactions: portfolio.transactions
   });
 });
 

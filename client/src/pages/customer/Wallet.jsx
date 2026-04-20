@@ -8,6 +8,7 @@ export const Wallet = () => {
   const { user } = useAuth();
   
   const [balance, setBalance] = useState(0);
+  const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -16,6 +17,7 @@ export const Wallet = () => {
       try {
         const data = await getPortfolio(user.token);
         setBalance(data.totalBalance);
+        setTransactions(data.transactions || []);
       } catch (err) {
         console.error('Failed to fetch portfolio', err);
       } finally {
@@ -41,9 +43,11 @@ export const Wallet = () => {
       if (type === 'deposit') {
         const data = await depositPortfolio(user.token, amount);
         setBalance(data.totalBalance);
+        if (data.transactions) setTransactions(data.transactions);
       } else {
         const data = await withdrawPortfolio(user.token, amount);
         setBalance(data.totalBalance);
+        if (data.transactions) setTransactions(data.transactions);
       }
       alert(`${type.charAt(0).toUpperCase() + type.slice(1)} successful!`);
     } catch (err) {
@@ -53,13 +57,13 @@ export const Wallet = () => {
     }
   };
 
-  // Simulated transactions
-  const transactions = [
-    { id: 1, type: 'deposit', amount: 1540.00, date: 'Today, 2:41 PM', status: 'Completed' },
-    { id: 2, type: 'withdrawal', amount: 350.50, date: 'Yesterday, 11:30 AM', status: 'Completed' },
-    { id: 3, type: 'deposit', amount: 8900.00, date: 'Oct 24, 9:15 AM', status: 'Completed' },
-    { id: 4, type: 'deposit', amount: 150.00, date: 'Oct 20, 4:00 PM', status: 'Completed' },
-  ];
+  const formatDate = (dateString) => {
+    const opts = { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+    return new Date(dateString).toLocaleDateString('en-US', opts);
+  };
+
+  // Sort transactions (newest first)
+  const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -143,34 +147,40 @@ export const Wallet = () => {
               </button>
             </div>
             
-            <div className="flex-1 p-6 flex flex-col gap-4">
-              {transactions.map((tx) => (
-                <div key={tx.id} className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors border border-transparent hover:border-gray-100 dark:hover:border-gray-700/50 cursor-pointer group">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${
-                      tx.type === 'deposit' 
-                        ? 'bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400' 
-                        : 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-                    }`}>
-                      {tx.type === 'deposit' ? <ArrowDownRight className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 dark:text-gray-100 capitalize">
-                        {tx.type === 'deposit' ? 'Trader Allocation' : 'Withdrawal Request'}
-                      </h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{tx.date}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className={`font-mono font-bold text-lg ${
-                      tx.type === 'deposit' ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-gray-100'
-                    }`}>
-                      {tx.type === 'deposit' ? '+' : '-'}${tx.amount.toFixed(2)}
-                    </div>
-                    <p className="text-xs font-semibold text-gray-400 dark:text-gray-500">{tx.status}</p>
-                  </div>
+            <div className="flex-1 p-6 flex flex-col gap-4 overflow-y-auto max-h-[400px]">
+              {sortedTransactions.length === 0 ? (
+                <div className="text-center text-gray-400 dark:text-gray-500 py-8">
+                  No recent activity
                 </div>
-              ))}
+              ) : (
+                sortedTransactions.map((tx) => (
+                  <div key={tx._id || Math.random().toString()} className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors border border-transparent hover:border-gray-100 dark:hover:border-gray-700/50 cursor-pointer group">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${
+                        tx.type === 'deposit' 
+                          ? 'bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400' 
+                          : 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                      }`}>
+                        {tx.type === 'deposit' ? <ArrowDownRight className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900 dark:text-gray-100 capitalize">
+                          {tx.type === 'deposit' ? 'Trader Allocation' : 'Withdrawal Request'}
+                        </h4>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{formatDate(tx.date)}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`font-mono font-bold text-lg ${
+                        tx.type === 'deposit' ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-gray-100'
+                      }`}>
+                        {tx.type === 'deposit' ? '+' : '-'}${tx.amount.toFixed(2)}
+                      </div>
+                      <p className="text-xs font-semibold text-gray-400 dark:text-gray-500">{tx.status}</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
