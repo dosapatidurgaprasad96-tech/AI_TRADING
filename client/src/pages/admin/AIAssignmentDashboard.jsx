@@ -30,16 +30,16 @@ export const AIAssignmentDashboard = () => {
     setRunning(true);
     setProcessStage('Analyzing trader performance & capacity...');
     await new Promise(resolve => setTimeout(resolve, 800));
-    
+
     setProcessStage('Matching client risk profiles with specialist nodes...');
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     setProcessStage('Generating AI reasoning via OpenRouter...');
     await simulateAIAssignment();
-    
+
     setProcessStage('Finalizing optimal pairings...');
     await new Promise(resolve => setTimeout(resolve, 600));
-    
+
     setRunning(false);
     setProcessStage('');
     setLastRun(new Date().toLocaleTimeString());
@@ -204,7 +204,7 @@ export const AIAssignmentDashboard = () => {
                           </Badge>
                         )}
                         <div className="flex gap-0.5">
-                          {[1,2,3].map(i => <Star key={i} className={`w-2.5 h-2.5 ${i <= (customer.feedback || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />)}
+                          {[1, 2, 3].map(i => <Star key={i} className={`w-2.5 h-2.5 ${i <= (customer.feedback || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />)}
                         </div>
                       </div>
                     </div>
