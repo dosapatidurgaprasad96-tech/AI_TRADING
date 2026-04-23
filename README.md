@@ -1,59 +1,110 @@
 # AllocateIQ - Advanced AI Trading Ecosystem
 
-A modern, full-stack, enterprise-grade platform for intelligent trading allocation. AllocateIQ features a secure Express/MongoDB backend mapped to a deeply interactive and responsive React frontend. It unites retail investors, professional traders, and system administrators into one cohesive ecosystem powered by simulated markets and AI-driven logic.
+AllocateIQ is an enterprise-grade, full-stack trading and allocation platform. It bridges the gap between retail investors and professional trading expertise by leveraging a neural matching engine and real-time AI advisory nodes.
 
-## 🚀 Key Ecosystem Features
+---
 
-### 🖥️ 1. Customer Environment (Retail Investors)
-- **AI Strategy Advisor**: Powered by **NVIDIA Nemotron-3**, receive context-aware market recommendations and entry strategies directly in your dashboard.
-- **Paper Trading Wallet**: A virtual hub to manually execute `BUY` and `SELL` orders, instantly tracking profits/losses via dynamic balances.
-- **Premium Profile & Feedback**: Manage your investment DNA (risk profile/specialization) and provide instant service feedback via a responsive star-rating system.
+## 📐 Platform Architecture
 
-### 🧑‍💼 2. Trader Interface (Employees)
-- **Market Intelligence**: Real-time simulated price ticks and fluctuations across major equities/crypto with integrated AI signals.
-- **Performance Insights**: Dedicated tracking for success rates, platform rankings, and growth trajectory charts.
-- **Execution History**: A comprehensive, searchable log of all trade orders executed across your assigned client base.
+```mermaid
+graph TD
+    User((User Roles)) --> |React + Vite| UI[Premium UI Layer]
+    UI --> |JWT Auth| API[Express API Gateway]
+    API --> |Neural Scoring| AE[AI Allocation Engine]
+    API --> |Market Ticks| MS[Market Simulation Service]
+    AE --> |Data Persistence| DB[(MongoDB Atlas)]
+    API --> |Strategy Request| NV[NVIDIA Nemotron-3 LLM]
+    NV --> |Real-time Advice| UI
+```
 
-### 🏛️ 3. Admin Control Panel (Administrators)
-- **System Health & Logs**: Real-time infrastructure monitoring with a live terminal-style console for Auth, DB, and AI engine events.
-- **Security Audit Trail**: Immutable logging of all administrative actions, ensuring total oversight of system overrides and logic changes.
-- **Platform Settings**: A control tower to adjust AI allocation intervals, minimum match scores, and global security configurations.
-- **AI Assignment Engine**: Monitor and rerun the logic engine that connects clients to traders based on neural scoring.
+---
 
-## 🎨 Design & Navigation
-The platform utilizes a **Premium Collapsible Sidebar** for a unified "App-First" experience.
-- **Role-Based Navigation**: The sidebar automatically adapts to show tools specific to your role.
-- **Unified Guest Experience**: Public links and Authentication (Sign In/Register) are integrated into the sidebar for a clean, consistent UI.
-- **Modern Aesthetics**: Built with glassmorphism, smooth transitions, and high-density typography to feel like a professional trading terminal.
+## 🚀 Core Modules
 
-## 🏃 Getting Started (Unified Workflow)
+### 🖥️ 1. Customer Intelligence Portal
+The primary interface for retail investors, designed for high-end usability and rapid decision support.
+- **AI Strategy Advisor**: Real-time integration with **NVIDIA's Nemotron-3 (120B)**. Receive complex market analysis, "Buy/Hold/Sell" recommendations, and risk-adjusted entry strategies.
+- **Paper Trading Engine**: Execute orders on a zero-risk simulated market. Track your net worth, available liquidity, and profit margins through a glassmorphic command center.
+- **Dynamic Profile DNA**: Customers define their risk appetite and financial goals, which are used as vector inputs for the platform's trader-matching logic.
+- **Instant Service Feedback**: Rate your assigned trader's performance (1-5 stars). The system uses this feedback to re-calculate trader "Success Scores" in real-time.
 
-### Prerequisites
-- [Node.js](https://nodejs.org/en/) (v18+)
-- MongoDB instance (Local or Atlas)
-- OpenRouter API Key (Configured in `server/.env`)
+### 🧑‍💼 2. Professional Trader (Employee) Suite
+A high-density terminal for professionals to manage their assigned client portfolios.
+- **Global Market Intelligence**: A live feed of assets (BTC, ETH, Stocks) with simulated price action updated via a dedicated backend ticker service.
+- **Performance Analytics**: Track personal growth via automated success-rate metrics, avg customer satisfaction, and platform-wide ranking.
+- **Execution History**: A detailed audit of all trades performed for every client, featuring advanced filtering and profit/loss analysis.
+- **Workload Management**: Automated indicators showing the trader's current client load vs. maximum capacity.
 
-### Installation & Launch
-1. **Clone & Install**:
-   ```bash
-   # From the project root
-   npm install
-   ```
-2. **Setup Environment**:
-   Ensure `server/.env` contains your `DB_URI` and `OPENROUTER_API_KEY`.
-3. **One-Command Start**:
-   ```bash
-   npm run dev
-   ```
-   This will concurrently launch the **Express Backend** (Port 5000) and the **Vite Frontend** (Port 5173).
+### 🏛️ 3. Admin Command & Control
+Total oversight of the ecosystem's health and security.
+- **AI Assignment Dashboard**: Monitor the neural engine as it pairs "High Risk" clients with "Expert" traders. Manual overrides and engine reruns available with one click.
+- **Platform Health & Logs**: A live terminal console tracking every INFO, WARN, and ERROR event across the API and Database clusters.
+- **Immutable Security Audit**: Every administrative action (weight changes, user deletions, role upgrades) is logged in a secure, immutable audit trail.
+- **Global Settings Control**: Adjust the platform's core physics—change AI allocation intervals, success-rate thresholds, and security compliance rules.
 
-## 🛠️ Core API Surface
-| Route Prefix | Primary Purpose |
-|---|---|
-| `/api/auth/*` | Secure login, role validation, and JWT token management |
-| `/api/ai/advice` | NVIDIA Nemotron-3 powered market analysis gateway |
-| `/api/allocate` | Neural matching engine for customer-trader pairing |
-| `/api/trades/*` | Execution of virtual buy/sell orders and history logging |
+---
+
+## 🎨 Design System: "Premium App-First"
+AllocateIQ departs from traditional flat web designs by utilizing:
+- **Unified Sidebar Navigation**: A single collapsible rail for both public and private routes, ensuring a focused workspace.
+- **Glassmorphism**: High-blur backdrops, subtle gradients, and translucent borders (CSS `backdrop-blur`).
+- **Interactive Micro-animations**: State-aware hover effects, pulse indicators for "Live" data, and smooth transition-timing functions.
+- **Dark-Mode Optimized**: A curated HSL color palette designed for high-contrast visibility in trading environments.
+
+---
+
+## 🔒 Security & Tech Stack
+
+### Frontend
+- **React 18**: Component-based architecture with context-driven state management.
+- **Vite**: Ultra-fast HMR and build pipelines.
+- **Lucide Icons**: Consistent, high-fidelity iconography.
+- **Tailwind CSS**: Utility-first styling with custom animation extensions.
+
+### Backend
+- **Node.js & Express**: Scalable RESTful architecture.
+- **MongoDB + Mongoose**: Document-oriented data modeling with strict schema validation.
+- **JWT + Bcrypt**: Secure token-based auth with salted password hashing.
+- **Concurrently**: Unified development lifecycle management.
+
+### AI Node
+- **NVIDIA Nemotron-3**: High-parameter LLM (120B) via OpenRouter for context-aware strategy generation.
+
+---
+
+## 🏃 Getting Started
+
+### 1. Environment Configuration
+Create a `.env` file in the `server/` directory:
+```env
+PORT=5000
+NODE_ENV=development
+DB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+OPENROUTER_API_KEY=your_nvidia_api_key
+```
+
+### 2. Rapid Installation
+```bash
+# From the root directory
+npm install
+```
+
+### 3. Execution
+```bash
+# Start both Frontend and Backend concurrently
+npm run dev
+```
+
+---
+
+## 🗺️ Roadmap
+- [ ] **Live Payout Integration**: Integration with Stripe for real-money commissions.
+- [ ] **Multi-Model Strategy Advisor**: Allow users to choose between NVIDIA, GPT-4, and Claude.
+- [ ] **Mobile Trading App**: React Native port for on-the-go allocation management.
+- [ ] **Vector Search for Matching**: Upgrade the AI engine to use Pinecone/Milvus for even more precise trader-customer pairing.
+
+---
 
 ## 📄 License
-This ecosystem is freely accessible under the MIT License framework.
+This platform is licensed under the **MIT License**.

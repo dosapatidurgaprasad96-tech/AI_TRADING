@@ -1,15 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
-import { TrendingUp, TrendingDown, BarChart3, Globe, Zap, Shield } from 'lucide-react';
+import { TrendingUp, TrendingDown, BarChart3, Globe, Zap, Shield, RefreshCw } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export const MarketAnalytics = () => {
-  const markets = [
-    { symbol: 'BTC/USD', price: '64,231.50', change: '+2.4%', status: 'Bullish', volume: '1.2B' },
-    { symbol: 'ETH/USD', price: '3,452.10', change: '-1.2%', status: 'Neutral', volume: '800M' },
-    { symbol: 'AAPL', price: '189.24', change: '+0.8%', status: 'Stable', volume: '45M' },
-    { symbol: 'EUR/USD', price: '1.0824', change: '+0.1%', status: 'Stable', volume: '200B' },
-  ];
+  const { user } = useAuth();
+  const [markets, setMarkets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchMarketData = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/system/market', {
+        headers: { 'Authorization': `Bearer ${user.token}` }
+      });
+      const data = await res.json();
+      setMarkets(data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Market fetch failed:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchMarketData();
+    const interval = setInterval(fetchMarketData, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -24,11 +41,16 @@ export const MarketAnalytics = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Market Ticker */}
         <div className="lg:col-span-2 space-y-4">
-          {markets.map((m) => (
-            <Card key={m.symbol} className="p-5 hover:border-indigo-500 transition-colors cursor-pointer">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 bg-gray-50 dark:bg-gray-800/20 rounded-3xl border-2 border-dashed border-gray-100 dark:border-gray-800">
+              <RefreshCw className="w-8 h-8 text-indigo-500 animate-spin mb-4" />
+              <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Synchronizing Market Data...</p>
+            </div>
+          ) : markets.map((m) => (
+            <Card key={m.symbol} className="p-5 hover:border-indigo-500 transition-colors cursor-pointer group/card">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-2xl">
+                  <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-2xl group-hover/card:bg-indigo-50 transition-colors">
                     <Globe className="w-5 h-5 text-indigo-500" />
                   </div>
                   <div>
@@ -37,9 +59,9 @@ export const MarketAnalytics = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-black text-gray-900 dark:text-white">${m.price}</p>
-                  <p className={`text-xs font-bold ${m.change.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
-                    {m.change.startsWith('+') ? <TrendingUp className="w-3 h-3 inline mr-1" /> : <TrendingDown className="w-3 h-3 inline mr-1" />}
+                  <p className="text-lg font-black text-gray-900 dark:text-white font-mono">${m.price}</p>
+                  <p className={`text-xs font-bold flex items-center justify-end ${m.change.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
+                    {m.change.startsWith('+') ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
                     {m.change}
                   </p>
                 </div>

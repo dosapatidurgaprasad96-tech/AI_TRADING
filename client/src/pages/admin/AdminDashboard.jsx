@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/Button';
 import {
   Users, BrainCircuit, Activity, TrendingUp, TrendingDown,
   DollarSign, Shield, AlertTriangle, CheckCircle, ArrowUpRight,
-  BarChart3, Zap, Target, Star, Clock, ChevronRight
+  BarChart3, Zap, Target, Star, Clock, ChevronRight, RefreshCw
 } from 'lucide-react';
 
 const SYSTEM_EVENTS = [
@@ -31,11 +31,24 @@ export const AdminDashboard = () => {
 
   const [pulse, setPulse] = useState(false);
   const [running, setRunning] = useState(false);
+  const [processStage, setProcessStage] = useState('');
 
   const handleAIMatch = async () => {
     setRunning(true);
+    setProcessStage('Analyzing platform data...');
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    setProcessStage('Calculating matching nodes...');
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    setProcessStage('Executing AI assignment...');
     await simulateAIAssignment();
+    
+    setProcessStage('Finalizing pairings...');
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
     setRunning(false);
+    setProcessStage('');
   };
 
   useEffect(() => {
@@ -44,7 +57,24 @@ export const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
+      {/* Processing Overlay */}
+      {running && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-indigo-950/20 backdrop-blur-md transition-all duration-500">
+          <div className="bg-white dark:bg-gray-900 p-8 rounded-3xl shadow-2xl border border-indigo-100 dark:border-indigo-800 flex flex-col items-center max-w-sm text-center animate-in zoom-in-95 duration-300">
+            <div className="relative mb-6">
+              <div className="w-20 h-20 border-4 border-indigo-100 dark:border-indigo-900 rounded-full" />
+              <div className="w-20 h-20 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin absolute inset-0" />
+              <BrainCircuit className="w-8 h-8 text-indigo-600 absolute inset-0 m-auto animate-pulse" />
+            </div>
+            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">Neural Engine Active</h3>
+            <p className="text-indigo-600 dark:text-indigo-400 font-bold text-sm h-10 flex items-center justify-center">
+              {processStage}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header Banner */}
       <div className="relative overflow-hidden bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 rounded-2xl p-7 text-white shadow-2xl shadow-indigo-900/40">
         <div className="absolute -right-16 -top-16 w-64 h-64 bg-white/5 rounded-full blur-2xl" />
@@ -64,8 +94,8 @@ export const AdminDashboard = () => {
               disabled={running}
               className="bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur text-white font-semibold min-w-[140px]"
             >
-              <Zap className={`w-4 h-4 mr-2 ${running ? 'animate-spin' : ''}`} />
-              {running ? 'Matching...' : 'Run AI Match'}
+              <RefreshCw className={`w-4 h-4 mr-2 ${running ? 'animate-spin' : ''}`} />
+              {running ? 'Processing...' : 'Run AI Match'}
             </Button>
             <Button
               onClick={() => navigate('/admin/analytics')}
