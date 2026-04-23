@@ -64,23 +64,6 @@ export const Navbar = () => {
           <span className="premium-logo-text">TradeAI</span>
         </div>
 
-        {/* Navigation Links - Hidden for logged in users (moved to Sidebar) */}
-        {!user && (
-          <div className="premium-nav-links">
-            {getRoleLinks().map((link) => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                className={({ isActive }) =>
-                  `premium-nav-link ${isActive ? 'active' : ''}`
-                }
-              >
-                {link.name}
-              </NavLink>
-            ))}
-          </div>
-        )}
-
         {/* Interactions & User Profile */}
         <div className="premium-nav-actions">
           <button
