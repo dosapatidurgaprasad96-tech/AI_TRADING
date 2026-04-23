@@ -10,6 +10,7 @@ const dashboardRoutes = require('./dashboardRoutes');
 const watchlistRoutes = require('./watchlistRoutes');
 const allocationRoutes = require('./allocationRoutes');
 const messageRoutes = require('./messageRoutes');
+const systemRoutes = require('./systemRoutes');
 
 const router = express.Router();
 
@@ -23,6 +24,7 @@ router.use('/dashboard', dashboardRoutes);
 router.use('/watchlist', watchlistRoutes);
 router.use('/allocate', allocationRoutes);
 router.use('/messages', messageRoutes);
+router.use('/system', systemRoutes);
 
 // Health check
 router.get('/status', (req, res) => {
