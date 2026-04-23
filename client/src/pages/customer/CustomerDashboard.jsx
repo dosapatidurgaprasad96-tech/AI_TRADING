@@ -258,6 +258,58 @@ export const CustomerDashboard = () => {
             </div>
           </Card>
 
+          {/* Feature Restored: AI Advisor */}
+          <Card className="p-6 border-indigo-100 dark:border-indigo-900/30">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+                <Brain className="w-5 h-5 text-indigo-600" />
+              </div>
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">AI Strategy Advisor</h3>
+            </div>
+
+            <form onSubmit={handleAskAI} className="space-y-4">
+              <div className="flex gap-2">
+                <Input 
+                  placeholder="Symbol (e.g. BTC)" 
+                  className="w-1/3 text-xs h-9"
+                  value={aiSymbol}
+                  onChange={(e) => setAiSymbol(e.target.value.toUpperCase())}
+                />
+                <Input 
+                  placeholder="Ask about strategy..." 
+                  className="flex-1 text-xs h-9"
+                  value={aiQuery}
+                  onChange={(e) => setAiQuery(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="w-full h-9 text-xs font-bold bg-indigo-600 hover:bg-indigo-700"
+                disabled={aiLoading}
+              >
+                {aiLoading ? 'Analyzing...' : 'Get AI Advice'}
+              </Button>
+            </form>
+
+            {aiResponse && (
+              <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800 animate-in slide-in-from-top-2 duration-300">
+                <p className="text-[11px] font-bold text-indigo-500 mb-1 uppercase tracking-tighter">✦ AI Analysis</p>
+                <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+                  {aiResponse}
+                </p>
+                <Button 
+                  variant="ghost" 
+                  className="h-6 px-0 text-[10px] text-gray-400 mt-2 hover:text-indigo-500"
+                  onClick={() => setAiResponse('')}
+                >
+                  Clear Advice
+                </Button>
+              </div>
+            )}
+          </Card>
+
           <Card className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white p-6 relative overflow-hidden">
             <div className="absolute -right-4 -bottom-4 opacity-20"><Brain className="w-24 h-24" /></div>
             <h4 className="text-lg font-black mb-2 leading-tight">Need expert consultation?</h4>
