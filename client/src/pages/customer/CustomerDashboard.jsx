@@ -335,7 +335,7 @@ export const CustomerDashboard = () => {
               </div>
               <div>
                 <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">AI Strategy Advisor</h3>
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Powered by NVIDIA Nemotron-3</p>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Powered by Neural Engine</p>
               </div>
             </div>
 
@@ -379,7 +379,7 @@ export const CustomerDashboard = () => {
               <div className="mt-6 p-4 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100/50 dark:border-indigo-900/30 animate-in fade-in slide-in-from-top-4 duration-500">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="flex h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
-                  <p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">NVIDIA AI RECOMMENDATION</p>
+                  <p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">AI STRATEGY RECOMMENDATION</p>
                 </div>
                 <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed font-medium">
                   {aiResponse}
