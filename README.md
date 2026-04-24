@@ -13,7 +13,7 @@ graph TD
     API --> |Neural Scoring| AE[AI Allocation Engine]
     API --> |Market Ticks| MS[Market Simulation Service]
     AE --> |Data Persistence| DB[(MongoDB Atlas)]
-    API --> |Strategy Request| NV[NVIDIA Nemotron-3 LLM]
+    API --> |Strategy Request| NV[Gemini-API Model API Key]
     NV --> |Real-time Advice| UI
 ```
 
