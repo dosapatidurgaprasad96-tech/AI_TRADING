@@ -1,6 +1,8 @@
 const asyncHandler = require('express-async-handler');
 const Message = require('../models/Message');
-const User = require('../models/User');
+const Admin = require('../models/Admin');
+const Customer = require('../models/Customer');
+const Trader = require('../models/Trader');
 
 // @desc    Send a message
 // @route   POST /api/messages
@@ -13,7 +15,11 @@ const sendMessage = asyncHandler(async (req, res) => {
     throw new Error('Message content is required');
   }
 
-  const receiver = await User.findById(receiverId);
+  // Check all collections for receiver
+  let receiver = await Admin.findById(receiverId);
+  if (!receiver) receiver = await Customer.findById(receiverId);
+  if (!receiver) receiver = await Trader.findById(receiverId);
+
   if (!receiver) {
     res.status(404);
     throw new Error('Receiver not found');

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Brain, Sparkles, TrendingUp } from 'lucide-react';
+import { Sparkles, TrendingUp } from 'lucide-react';
 import { Card, CardContent } from '../ui/Card';
 
 import { API_URL } from '../../services/api';
@@ -39,7 +39,7 @@ export const PredictiveCard = ({ token }) => {
           <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-white" />
           </div>
-          <h3 className="text-white font-black uppercase tracking-widest text-xs">✦ AI Predictive Warning</h3>
+          <h3 className="text-white font-black uppercase tracking-widest text-xs">✦ System Forecast Warning</h3>
         </div>
         <p className="text-indigo-50 text-sm font-medium leading-relaxed italic">
           "{prediction}"

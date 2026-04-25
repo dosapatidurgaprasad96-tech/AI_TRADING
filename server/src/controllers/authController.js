@@ -1,5 +1,7 @@
 const asyncHandler = require('express-async-handler');
-const User = require('../models/User');
+const Admin = require('../models/Admin');
+const Customer = require('../models/Customer');
+const Trader = require('../models/Trader');
 const generateToken = require('../utils/generateToken');
 
 // @desc    Register a new user
@@ -8,21 +10,30 @@ const generateToken = require('../utils/generateToken');
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, role, phone, investment } = req.body;
 
-  const userExists = await User.findOne({ email });
+  // Check all collections for duplicate email
+  const adminExists = await Admin.findOne({ email });
+  const customerExists = await Customer.findOne({ email });
+  const traderExists = await Trader.findOne({ email });
 
-  if (userExists) {
+  if (adminExists || customerExists || traderExists) {
     res.status(400);
     throw new Error('User already exists');
   }
 
-  const user = await User.create({ 
-    name, 
-    email, 
-    password, 
-    role: role || 'Customer',
-    phone,
-    portfolioValue: investment ? Number(investment) : 0
-  });
+  let user;
+  if (role === 'Admin') {
+    user = await Admin.create({ name, email, password });
+  } else if (role === 'Employee') {
+    user = await Trader.create({ name, email, password });
+  } else {
+    user = await Customer.create({ 
+      name, 
+      email, 
+      password, 
+      phone,
+      portfolioValue: investment ? Number(investment) : 0
+    });
+  }
 
   if (user) {
     res.status(201).json({
@@ -44,7 +55,10 @@ const registerUser = asyncHandler(async (req, res) => {
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
+  // Search across collections
+  let user = await Admin.findOne({ email });
+  if (!user) user = await Customer.findOne({ email });
+  if (!user) user = await Trader.findOne({ email });
 
   if (user && (await user.matchPassword(password))) {
     res.json({

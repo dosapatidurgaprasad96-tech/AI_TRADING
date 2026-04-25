@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const Admin = require('../models/Admin');
+const Customer = require('../models/Customer');
+const Trader = require('../models/Trader');
 
 const protect = async (req, res, next) => {
   let token;
@@ -8,7 +10,13 @@ const protect = async (req, res, next) => {
     try {
       token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret123');
-      req.user = await User.findById(decoded.id).select('-password');
+      
+      // Search across collections
+      let user = await Admin.findById(decoded.id).select('-password');
+      if (!user) user = await Customer.findById(decoded.id).select('-password');
+      if (!user) user = await Trader.findById(decoded.id).select('-password');
+      
+      req.user = user;
       next();
     } catch (error) {
       console.error(error);

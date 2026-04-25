@@ -19,9 +19,11 @@ const EditUserModal = ({ user, employees, onSave, onClose }) => {
   const [form, setForm] = useState({
     name: user.name,
     role: user.role,
-    risk: user.risk || 'Medium',
+    riskAppetite: user.riskAppetite || 'Medium',
     experience: user.experience || 'Junior',
-    specialization: user.specialization || 'mixed',
+    specialization: user.specialization || 'Equity',
+    preferredSpecialization: user.preferredSpecialization || 'Equity',
+    complexity: user.complexity || 5,
     successRate: user.successRate || 75,
   });
 
@@ -97,25 +99,48 @@ const EditUserModal = ({ user, employees, onSave, onClose }) => {
               </div>
             </>
           ) : (
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Risk Level</label>
-              <div className="flex gap-2">
-                {RISK_OPTIONS.map(r => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setForm({ ...form, risk: r })}
-                    className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-colors border ${
-                      form.risk === r
-                        ? r === 'High' ? 'bg-red-100 border-red-300 text-red-700 dark:bg-red-500/20 dark:border-red-500/30 dark:text-red-400'
-                          : r === 'Medium' ? 'bg-yellow-100 border-yellow-300 text-yellow-700 dark:bg-yellow-500/20 dark:border-yellow-500/30 dark:text-yellow-400'
-                          : 'bg-green-100 border-green-300 text-green-700 dark:bg-green-500/20 dark:border-green-500/30 dark:text-green-400'
-                        : 'bg-gray-50 border-gray-200 text-gray-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400'
-                    }`}
-                  >
-                    {r}
-                  </button>
-                ))}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Risk Appetite</label>
+                <div className="flex gap-2">
+                  {RISK_OPTIONS.map(r => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setForm({ ...form, riskAppetite: r })}
+                      className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-colors border ${
+                        form.riskAppetite === r
+                          ? r === 'High' ? 'bg-red-100 border-red-300 text-red-700 dark:bg-red-500/20 dark:border-red-500/30 dark:text-red-400'
+                            : r === 'Medium' ? 'bg-yellow-100 border-yellow-300 text-yellow-700 dark:bg-yellow-500/20 dark:border-yellow-500/30 dark:text-yellow-400'
+                            : 'bg-green-100 border-green-300 text-green-700 dark:bg-green-500/20 dark:border-green-500/30 dark:text-green-400'
+                          : 'bg-gray-50 border-gray-200 text-gray-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400'
+                      }`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Preferred Market</label>
+                <select
+                  value={form.preferredSpecialization}
+                  onChange={e => setForm({ ...form, preferredSpecialization: e.target.value })}
+                  className="w-full h-10 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none dark:text-white"
+                >
+                  {['Equity', 'Forex', 'Crypto', 'Commodities'].map(o => <option key={o}>{o}</option>)}
+                </select>
+              </div>
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Complexity</label>
+                  <span className="text-xs font-bold text-indigo-600">{form.complexity}/10</span>
+                </div>
+                <input 
+                  type="range" min="1" max="10" value={form.complexity}
+                  onChange={e => setForm({ ...form, complexity: Number(e.target.value) })}
+                  className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                />
               </div>
             </div>
           )}
@@ -336,10 +361,22 @@ export const UsersManagement = () => {
             ) : (
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Risk Level</span>
-                  <Badge variant={u.risk === 'High' ? 'danger' : u.risk === 'Low' ? 'success' : 'warning'} className="text-xs">
-                    {u.risk}
+                  <span className="text-gray-500">Risk Appetite</span>
+                  <Badge variant={u.riskAppetite === 'High' ? 'danger' : u.riskAppetite === 'Low' ? 'success' : 'warning'} className="text-xs">
+                    {u.riskAppetite || 'Medium'}
                   </Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Market Focus</span>
+                  <span className="font-semibold text-gray-800 dark:text-gray-200 text-xs">
+                    {u.preferredSpecialization || 'Equity'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Complexity</span>
+                  <span className="font-semibold text-gray-800 dark:text-gray-200">
+                    {u.complexity || 5}/10
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Rating</span>

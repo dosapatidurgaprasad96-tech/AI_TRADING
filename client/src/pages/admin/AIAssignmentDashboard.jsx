@@ -3,11 +3,12 @@ import { useAppData } from '../../context/AppDataContext';
 import { useAuth } from '../../context/AuthContext';
 import { SmartAlertBar } from '../../components/admin/SmartAlertBar';
 import { PredictiveCard } from '../../components/admin/PredictiveCard';
+import { getDashboardSummary, getAIAdvice, sendMessage as sendMessageAPI, allocateCustomer, finalizeAllocationProposal, rejectAllocationProposal, unassignCustomerTrader, updateUserProfile } from '../../services/api';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import {
-  Brain, Cpu, Database, Activity, Zap, RefreshCw,
+  Zap, Cpu, Database, Activity, RefreshCw,
   ArrowRight, CheckCircle, AlertTriangle, Shield, Star, Users
 } from 'lucide-react';
 
@@ -34,7 +35,7 @@ export const AIAssignmentDashboard = () => {
     setProcessStage('Matching client risk profiles with specialist nodes...');
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    setProcessStage('Generating AI reasoning via OpenRouter...');
+    setProcessStage('Generating system reasoning...');
     await simulateAIAssignment();
 
     setProcessStage('Finalizing optimal pairings...');
@@ -63,9 +64,9 @@ export const AIAssignmentDashboard = () => {
             <div className="relative mb-6">
               <div className="w-20 h-20 border-4 border-indigo-100 dark:border-indigo-900 rounded-full" />
               <div className="w-20 h-20 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin absolute inset-0" />
-              <Brain className="w-8 h-8 text-indigo-600 absolute inset-0 m-auto animate-pulse" />
+              <Zap className="w-8 h-8 text-indigo-600 absolute inset-0 m-auto animate-pulse" />
             </div>
-            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">Neural Link Active</h3>
+            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">System Link Active</h3>
             <p className="text-indigo-600 dark:text-indigo-400 font-bold text-sm h-10 flex items-center justify-center">
               {processStage}
             </p>
@@ -83,17 +84,17 @@ export const AIAssignmentDashboard = () => {
       {/* Hero Banner */}
       <div className="relative overflow-hidden bg-gradient-to-r from-indigo-900 via-violet-900 to-purple-900 rounded-2xl p-8 text-white shadow-2xl shadow-indigo-900/40">
         <div className="absolute -right-20 -top-20 opacity-10 pointer-events-none">
-          <Brain className="w-96 h-96" />
+          <Zap className="w-96 h-96" />
         </div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-2 mb-3">
               <span className="w-2 h-2 rounded-full bg-green-400 animate-ping" />
-              <span className="text-xs font-bold uppercase tracking-widest text-indigo-200">AI Engine Active</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-indigo-200">System Engine Active</span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-black mb-2">AI Assignment Engine</h1>
+            <h1 className="text-3xl md:text-4xl font-black mb-2">System Assignment Engine</h1>
             <p className="text-indigo-200 text-sm max-w-lg leading-relaxed">
-              Our neural matching algorithm analyzes client risk profiles, historical feedback, and trader success rates to create optimal pairings.
+              Our proprietary matching algorithm analyzes client risk profiles, historical feedback, and trader success rates to create optimal pairings.
             </p>
             {lastRun && (
               <p className="text-xs text-indigo-300 mt-2">Last run: {lastRun}</p>
@@ -119,7 +120,7 @@ export const AIAssignmentDashboard = () => {
               className="bg-white text-indigo-900 hover:bg-indigo-50 font-bold px-6"
             >
               <RefreshCw className={`w-4 h-4 mr-2 ${running ? 'animate-spin' : ''}`} />
-              {running ? 'Processing...' : 'Rerun AI Match'}
+              {running ? 'Processing...' : 'Rerun System Match'}
             </Button>
           </div>
         </div>
@@ -212,23 +213,36 @@ export const AIAssignmentDashboard = () => {
 
                   {/* Arrow */}
                   <div className="flex flex-col items-center px-2">
-                    <Brain className="w-4 h-4 text-indigo-500 mb-1" />
+                    <Zap className="w-4 h-4 text-indigo-500 mb-1" />
                     <ArrowRight className="w-4 h-4 text-gray-300" />
                   </div>
 
                   {/* Trader */}
-                  <div className="flex items-center gap-3 flex-1 min-w-0 justify-end">
-                    {trader ? (
-                      <>
-                        <div className="text-right min-w-0">
-                          <p className="font-bold text-gray-900 dark:text-gray-100 text-sm truncate">{trader.name}</p>
-                          <p className="text-xs text-indigo-500 capitalize">{trader.experience}</p>
+                    <div className="flex items-center gap-3 flex-1 min-w-0 justify-end">
+                      {trader ? (
+                        <div className="flex items-center gap-4">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-[10px] h-7 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 font-bold px-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`Unassign ${trader.name} from ${customer.name}?`)) {
+                                unassignCustomerTrader(user.token, customer.id).then(() => window.location.reload());
+                              }
+                            }}
+                          >
+                            <X className="w-3 h-3 mr-1" /> DISMISS
+                          </Button>
+                          <div className="text-right min-w-0">
+                            <p className="font-bold text-gray-900 dark:text-gray-100 text-sm truncate">{trader.name}</p>
+                            <p className="text-xs text-indigo-500 capitalize">{trader.experience}</p>
+                          </div>
+                          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-black text-lg flex-shrink-0">
+                            {trader.name.charAt(0)}
+                          </div>
                         </div>
-                        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-black text-lg flex-shrink-0">
-                          {trader.name.charAt(0)}
-                        </div>
-                      </>
-                    ) : (
+                      ) : (
                       <div className="flex items-center gap-2 text-amber-500">
                         <AlertTriangle className="w-4 h-4" />
                         <span className="text-sm font-semibold">Unmatched</span>
@@ -280,8 +294,8 @@ export const AIAssignmentDashboard = () => {
                     </div>
                     <div className="mt-3 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl">
                       <p className="text-xs text-indigo-700 dark:text-indigo-300 flex items-start gap-1.5">
-                        <Brain className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-indigo-500" />
-                        <span className="font-semibold">AI Match Reasoning:</span> {customer.aiExplanation || RISK_LOGIC[customer.risk]?.reason}
+                        <Zap className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-indigo-500" />
+                        <span className="font-semibold">Match Reasoning:</span> {customer.aiExplanation || RISK_LOGIC[customer.risk]?.reason}
                       </p>
                     </div>
                   </div>

@@ -20,4 +20,11 @@ router.route('/')
   )
   .get(protect, getTrades);
 
+router.get('/all', protect, (req, res, next) => {
+  if (req.user.role !== 'Admin') {
+    return res.status(403).json({ message: 'Admin access only' });
+  }
+  next();
+}, require('../controllers/tradeController').getAllTrades);
+
 module.exports = router;

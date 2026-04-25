@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const allocationSchema = new mongoose.Schema({
-  clientId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  clientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true },
   traderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Trader', required: true },
   matchScore: { type: Number, required: true },
   aiExplanation: { type: String },

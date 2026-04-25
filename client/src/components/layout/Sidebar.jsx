@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { 
   LayoutDashboard, 
   Users, 
-  Brain, 
+  Zap, 
   LineChart, 
   History, 
   Settings, 
@@ -41,7 +41,7 @@ export const Sidebar = () => {
     if (user.role === 'Admin') return [
       { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
       { name: 'Users', path: '/admin/users', icon: Users },
-      { name: 'AI Logic', path: '/admin/ai-assignment', icon: Brain },
+      { name: 'System Logic', path: '/admin/ai-assignment', icon: Zap },
       { name: 'Analytics', path: '/admin/analytics', icon: LineChart },
       { name: 'System Logs', path: '/admin/system-logs', icon: Terminal },
       { name: 'Audit Trail', path: '/admin/audit-trail', icon: Shield },

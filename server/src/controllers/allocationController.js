@@ -1,7 +1,8 @@
 const asyncHandler = require('express-async-handler');
 const { runAutoAllocation, checkReallocations, runSingleAllocation, finalizeAllocation, rejectAllocation, unassignTrader } = require('../services/allocationService');
 const Allocation = require('../models/Allocation');
-const User = require('../models/User');
+const Customer = require('../models/Customer');
+const Trader = require('../models/Trader');
 
 // @desc    Run full allocation engine
 // @route   POST /api/allocate
@@ -29,14 +30,14 @@ const reassignClient = asyncHandler(async (req, res) => {
   const { clientId } = req.params;
   const { traderId } = req.body;
 
-  const client = await User.findById(clientId);
+  const client = await Customer.findById(clientId);
   if (!client) return res.status(404).json({ message: 'Client not found' });
 
   if (client.assignedTraderId) {
-    await User.findByIdAndUpdate(client.assignedTraderId, { $inc: { currentLoad: -1 } });
+    await Trader.findByIdAndUpdate(client.assignedTraderId, { $inc: { currentLoad: -1 } });
   }
 
-  await User.findByIdAndUpdate(traderId, { $inc: { currentLoad: 1 } });
+  await Trader.findByIdAndUpdate(traderId, { $inc: { currentLoad: 1 } });
 
   client.assignedTraderId = traderId;
   await client.save();
@@ -75,7 +76,19 @@ const rejectProposal = asyncHandler(async (req, res) => {
 });
 
 const unassignClient = asyncHandler(async (req, res) => {
-  const result = await unassignTrader(req.user._id);
+  const { clientId } = req.body;
+  const targetId = clientId || req.user._id;
+
+  // Authority Check
+  if (req.user.role !== 'Admin' && req.user._id.toString() !== targetId.toString()) {
+    // If not admin and not self (Customer), check if it's a Trader unassigning their client
+    const client = await Customer.findById(targetId);
+    if (!client || client.assignedTraderId?.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to unassign this user' });
+    }
+  }
+
+  const result = await unassignTrader(targetId);
   res.status(200).json(result);
 });
 

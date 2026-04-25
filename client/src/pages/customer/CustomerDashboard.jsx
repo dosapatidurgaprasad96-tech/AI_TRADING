@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Ca
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
-import { Wallet, Activity, Contact, TrendingUp, DollarSign, Brain, Send, ArrowUpRight, Eye, Check, X, Info, Target } from 'lucide-react';
+import { Wallet, Activity, Contact, TrendingUp, DollarSign, Zap, Send, ArrowUpRight, Eye, Check, X, Info, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getDashboardSummary, getAIAdvice, sendMessage as sendMessageAPI, allocateCustomer, finalizeAllocationProposal, rejectAllocationProposal, unassignCustomerTrader, updateUserProfile } from '../../services/api';
 
@@ -231,13 +231,13 @@ export const CustomerDashboard = () => {
       {!assignedTrader && !proposedMatch && (
         <Card className="relative overflow-hidden bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 border-none shadow-2xl p-8 text-white">
           <div className="absolute top-0 right-0 p-8 opacity-10 animate-pulse">
-            <Brain className="w-32 h-32" />
+            <Zap className="w-32 h-32" />
           </div>
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="max-w-xl">
               <div className="flex items-center gap-2 mb-4">
                 <span className="h-2 w-2 rounded-full bg-indigo-400 animate-ping" />
-                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-200">Neural Matching Engine Active</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-200">System Engine Active</p>
               </div>
               <h2 className="text-3xl font-black mb-3">Initialize Your Trading DNA</h2>
               <p className="text-indigo-100 text-sm leading-relaxed mb-6">
@@ -254,7 +254,7 @@ export const CustomerDashboard = () => {
                   </span>
                 ) : (
                   <>
-                    <Brain className="w-4 h-4 mr-2" /> REQUEST AI MATCH
+                    <Zap className="w-4 h-4 mr-2" /> REQUEST AI MATCH
                   </>
                 )}
               </Button>
@@ -282,8 +282,8 @@ export const CustomerDashboard = () => {
         <Card className="relative overflow-hidden border-2 border-indigo-500/50 bg-white dark:bg-gray-900 shadow-2xl p-0 transition-all animate-in zoom-in-95 duration-500">
           <div className="bg-indigo-600 p-4 flex items-center justify-between text-white">
             <div className="flex items-center gap-2">
-              <Brain className="w-5 h-5" />
-              <span className="text-sm font-black uppercase tracking-widest">AI Match Discovery</span>
+              <Zap className="w-5 h-5" />
+              <span className="text-sm font-black uppercase tracking-widest">System Match Discovery</span>
             </div>
             <Badge className="bg-white/20 text-white border-none">Match Score: {proposedMatch.matchScore}%</Badge>
           </div>
@@ -322,7 +322,7 @@ export const CustomerDashboard = () => {
             <div className="bg-gray-50 dark:bg-gray-800/50 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 flex flex-col">
               <div className="flex items-center gap-2 mb-4 text-indigo-600">
                 <Info className="w-4 h-4" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Neural Logic Justification</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">System Match Reasoning</span>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed italic flex-1">
                 "{proposedMatch.aiExplanation}"
@@ -360,7 +360,7 @@ export const CustomerDashboard = () => {
               </div>
               <div>
                 <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Define Your Strategy</h3>
-                <p className="text-sm text-gray-500">Customize these parameters to refine your neural match</p>
+                <p className="text-sm text-gray-500">Customize these parameters to refine your match</p>
               </div>
             </div>
 
@@ -430,7 +430,7 @@ export const CustomerDashboard = () => {
                   onClick={handleAIMatch}
                   className="flex-1 h-14 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg shadow-xl shadow-indigo-600/20"
                 >
-                  <Brain className="w-5 h-5 mr-2" /> GENERATE NEURAL MATCH
+                  <Zap className="w-5 h-5 mr-2" /> GENERATE MATCH
                 </Button>
                 <Button 
                   variant="ghost" 
@@ -454,7 +454,7 @@ export const CustomerDashboard = () => {
             <div className="flex-1 text-center md:text-left">
               <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">Help Us Refine Your Match</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                Your feedback helps our Neural Engine understand your preferences better. Why wasn't this trader the right fit?
+                Your feedback helps our system engine understand your preferences better. Why wasn't this trader the right fit?
               </p>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
@@ -506,11 +506,11 @@ export const CustomerDashboard = () => {
           <Card className="p-6 border-indigo-100 dark:border-indigo-900/30 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2.5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-md shadow-indigo-500/20">
-                <Brain className="w-5 h-5 text-white" />
+                <Zap className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">AI Strategy Advisor</h3>
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Powered by Neural Engine</p>
+                <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">System Strategy Advisor</h3>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Proprietary Optimization Engine</p>
               </div>
             </div>
 
@@ -686,7 +686,7 @@ export const CustomerDashboard = () => {
             {assignedTrader && (
               <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-2 mb-3">
-                  <Brain className="w-3 h-3 text-indigo-500" />
+                  <Zap className="w-3 h-3 text-indigo-500" />
                   <p className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-tighter">Match Logic Justification</p>
                 </div>
                 <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800">

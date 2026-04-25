@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const tradeSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true },
   symbol: { type: String, required: true },
   type: { type: String, enum: ['BUY', 'SELL'], required: true },
   quantity: { type: Number, required: true, min: 0 },
