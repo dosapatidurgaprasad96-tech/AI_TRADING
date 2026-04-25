@@ -1,0 +1,53 @@
+# TradeAI Project Components & Work Documentation
+
+## 1. Layout Components
+- **Navbar.jsx**: Handles main navigation, branding (TradeAI), theme toggling (Dark/Light mode), and user authentication status (profile/logout).
+- **Sidebar.jsx**: Provides role-specific side navigation for quick access to various dashboard sections.
+- **ProtectedRoute.jsx**: A wrapper component that secures routes, ensuring only authenticated users with the correct roles (Admin, Employee, Customer) can access specific pages.
+
+## 2. UI Components (Reusable)
+- **Button.jsx / Input.jsx / Card.jsx / Badge.jsx / Modal.jsx**: Core UI elements with consistent premium styling (glassmorphism, gradients) used across the platform.
+- **StarRating.jsx**: Component for displaying and collecting feedback ratings.
+- **Table.jsx**: Displays structured data like trade history or user lists.
+
+## 3. Public Pages
+- **Home.jsx**: The main landing page featuring a hero section, live market stream simulation, and AI value proposition.
+- **About.jsx / Contact.jsx / Platform.jsx / Pricing.jsx**: Informational pages explaining the company, services, and costs.
+
+## 4. Authentication Pages
+- **Login.jsx**: Secure entry point for existing users.
+- **Register.jsx**: Handles user sign-up with a standard flow for Admin/Employee roles and an advanced 5-step AI-driven profiling flow for Customers (covering financials, risk, behavioral assessment, and trading preferences).
+
+## 5. Customer Dashboard & Pages
+- **CustomerDashboard.jsx**: The central hub for customers. It includes:
+    - **Portfolio Summary**: Balance, net worth, and total trades.
+    - **AI Strategy Advisor**: NVIDIA-powered tool for market insights.
+    - **Expert Partner Section**: Shows the assigned elite trader and allows direct messaging.
+    - **Recent Operations**: Feed of recent trade signals and actions.
+- **Onboarding.jsx**: Guides new customers through risk profile setup.
+- **Wallet.jsx**: Detailed view and management of cash and asset holdings.
+- **TradeHistory.jsx**: Full log of all trades executed for the customer.
+- **Profile.jsx**: Manage personal settings and preferences.
+
+## 6. Employee (Trader) Dashboard & Pages
+- **EmployeeDashboard.jsx**: The "Control Center" for professional traders. Features:
+    - **Allocation Load**: Visualizes current client load vs. capacity.
+    - **AI Trader Copilot**: Real-time AI assistance for strategy formulation.
+    - **Live Market Watch**: Real-time ticker for major assets (AAPL, BTC, etc.).
+    - **Priority Attention Queue**: Highlights clients needing immediate action or risk mitigation.
+- **MyCustomers.jsx**: Management interface for all assigned client portfolios.
+- **MarketAnalytics.jsx**: Tools for deep market data analysis.
+- **PerformanceInsights.jsx**: Visualizes the trader's success rate and performance metrics.
+
+## 7. Admin Dashboard & Pages
+- **AdminDashboard.jsx**: Overview of system-wide activity.
+- **UsersManagement.jsx**: Interface for managing all platform users and roles.
+- **AIAssignmentDashboard.jsx**: Manages the logic that pairs customers with traders.
+- **SystemLogs.jsx / AuditTrail.jsx**: Monitoring tools for platform security and activity tracking.
+- **PlatformSettings.jsx**: Configuration for platform-wide variables and features.
+
+## 8. Core Context & Services
+- **AuthContext.js**: Manages user session, login/logout, and role-based permissions.
+- **ThemeContext.js**: Manages global dark/light mode state.
+- **AppDataContext.js**: Centralized state management for application data (users, trades, etc.).
+- **api.js**: Centralized service for making backend API calls.
