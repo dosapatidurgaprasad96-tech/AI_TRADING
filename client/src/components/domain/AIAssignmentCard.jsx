@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { StarRating } from '../ui/StarRating';
-import { BrainCircuit, ArrowRight } from 'lucide-react';
+import { Zap, ArrowRight } from 'lucide-react';
 
 export const AIAssignmentCard = ({ customer, assignedEmployee }) => {
   if (!customer || !assignedEmployee) return null;
@@ -12,8 +12,8 @@ export const AIAssignmentCard = ({ customer, assignedEmployee }) => {
       <CardHeader className="pb-2">
         <CardTitle className="flex justify-between items-center text-sm font-medium text-gray-500 dark:text-gray-400">
           <span className="flex items-center gap-2">
-            <BrainCircuit className="w-4 h-4 text-indigo-500" />
-            AI Assignment Match
+            <Zap className="w-4 h-4 text-indigo-500" />
+            System Assignment Match
           </span>
           <Badge variant="brand">Active Match</Badge>
         </CardTitle>

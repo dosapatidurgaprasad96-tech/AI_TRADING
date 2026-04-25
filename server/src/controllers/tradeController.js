@@ -87,4 +87,9 @@ const getTrades = asyncHandler(async (req, res) => {
   res.json(trades);
 });
 
-module.exports = { executeTrade, getTrades };
+const getAllTrades = asyncHandler(async (req, res) => {
+  const trades = await Trade.find({}).populate('user', 'name email').sort({ createdAt: -1 });
+  res.json(trades);
+});
+
+module.exports = { executeTrade, getTrades, getAllTrades };

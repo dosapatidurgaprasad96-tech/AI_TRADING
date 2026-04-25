@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const Customer = require('../models/Customer');
 const Trader = require('../models/Trader');
 const Allocation = require('../models/Allocation');
 const { getMatchExplanation } = require('./geminiService');
@@ -6,7 +6,7 @@ const { calculateMatchScore } = require('./scoringService');
 const { getWorkloadPenalty, isOverloaded } = require('./workloadService');
 
 const runAutoAllocation = async () => {
-  const unassignedClients = await User.find({ role: 'Customer', assignedTraderId: null });
+  const unassignedClients = await Customer.find({ assignedTraderId: null });
   const availableTraders = await Trader.find({ isAvailable: true });
 
   if (unassignedClients.length === 0 || availableTraders.length === 0) {
@@ -111,7 +111,7 @@ const checkReallocations = async () => {
 };
 
 const runSingleAllocation = async (clientId) => {
-  const client = await User.findById(clientId);
+  const client = await Customer.findById(clientId);
   if (!client) {
     throw new Error('Client not found.');
   }
@@ -175,7 +175,7 @@ const finalizeAllocation = async (allocationId) => {
     throw new Error('Invalid or expired allocation proposal.');
   }
 
-  const client = await User.findById(allocation.clientId);
+  const client = await Customer.findById(allocation.clientId);
   const trader = await Trader.findById(allocation.traderId);
 
   if (!client || !trader) {
@@ -184,11 +184,11 @@ const finalizeAllocation = async (allocationId) => {
 
   // Handle re-assignment workload balancing
   if (client.assignedTraderId) {
-    await User.findByIdAndUpdate(client.assignedTraderId, { $inc: { currentLoad: -1 } });
+    await Trader.findByIdAndUpdate(client.assignedTraderId, { $inc: { currentLoad: -1 } });
   }
 
   // Finalize assignment
-  await User.findByIdAndUpdate(client._id, { assignedTraderId: trader._id });
+  await Customer.findByIdAndUpdate(client._id, { assignedTraderId: trader._id });
   await Trader.findByIdAndUpdate(trader._id, { $inc: { currentLoad: 1 } });
 
   allocation.status = 'Active';
@@ -207,7 +207,7 @@ const rejectAllocation = async (allocationId) => {
 };
 
 const unassignTrader = async (clientId) => {
-  const client = await User.findById(clientId);
+  const client = await Customer.findById(clientId);
   if (!client || !client.assignedTraderId) {
     throw new Error('Client not found or no trader assigned.');
   }
@@ -218,7 +218,7 @@ const unassignTrader = async (clientId) => {
   await Trader.findByIdAndUpdate(traderId, { $inc: { currentLoad: -1 } });
 
   // Unassign client
-  await User.findByIdAndUpdate(clientId, { assignedTraderId: null });
+  await Customer.findByIdAndUpdate(clientId, { assignedTraderId: null });
 
   // Update allocation record
   await Allocation.updateMany(

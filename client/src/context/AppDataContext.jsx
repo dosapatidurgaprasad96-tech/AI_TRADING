@@ -111,9 +111,31 @@ export const AppDataProvider = ({ children }) => {
             name: c.name,
             role: 'Customer',
             risk: c.riskAppetite,
+            riskAppetite: c.riskAppetite,
+            preferredSpecialization: c.preferredSpecialization,
+            complexity: c.complexity,
             assignedTraderId: c.assignedTraderId,
             portfolioValue: c.portfolioValue
           })));
+
+          // Fetch all trades if Admin
+          if (user.role === 'Admin') {
+            const tradeRes = await fetch(`${API_URL}/trades/all`, { headers: { 'Authorization': `Bearer ${user.token}` } });
+            if (tradeRes.ok) {
+              const tradeData = await tradeRes.json();
+              setTrades(tradeData.map(t => ({
+                id: t._id,
+                customerId: t.user?._id,
+                customerName: t.user?.name,
+                symbol: t.symbol,
+                type: t.type,
+                amount: t.quantity * t.price,
+                date: new Date(t.createdAt).toLocaleDateString(),
+                status: 'Completed',
+                profit: '+2.4%' // Mocked for now
+              })));
+            }
+          }
         }
       } catch (err) {
         console.warn('Live sync failed:', err);

@@ -239,10 +239,11 @@ export const rejectAllocationProposal = async (token, allocationId) => {
   return handleResponse(res);
 };
 
-export const unassignCustomerTrader = async (token) => {
+export const unassignCustomerTrader = async (token, clientId = null) => {
   const res = await fetch(`${API_URL}/allocate/unassign`, {
     method: 'POST',
     headers: getHeaders(token),
+    body: JSON.stringify({ clientId }),
   });
   return handleResponse(res);
 };

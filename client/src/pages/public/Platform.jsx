@@ -15,7 +15,7 @@ export const Platform = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {[
-          { icon: BrainCircuit, title: 'Neural Matching', desc: 'Identifies elite traders based strictly on customized algorithmic risk assignment nodes.' },
+          { icon: Zap, title: 'System Optimization', desc: 'Identifies elite traders based strictly on customized algorithmic risk assignment nodes.' },
           { icon: Activity, title: 'Real-time Execution', desc: 'Syncs transactions and wallet updates with no perceptible server latency using our advanced proxy setup.' },
           { icon: Shield, title: 'Encrypted Routing', desc: 'End-to-end proxy obfuscation to protect dynamic trading decisions from frontend interception.' },
           { icon: Zap, title: 'Sub-Millisecond APIs', desc: 'Powered by highly optimized Express backend endpoints prioritizing high-throughput logic requests.' },

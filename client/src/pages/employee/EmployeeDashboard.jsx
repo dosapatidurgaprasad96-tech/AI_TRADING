@@ -6,11 +6,11 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Ca
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
-import { getAIAdvice } from '../../services/api';
+import { getAIAdvice, unassignCustomerTrader } from '../../services/api';
 import {
   Users, Target, TrendingUp, TrendingDown, Activity,
   ArrowUpRight, BarChart3, Star, Clock, DollarSign,
-  Zap, CheckCircle, AlertCircle, ChevronRight, Brain, 
+  Zap, CheckCircle, AlertCircle, ChevronRight, 
   Layers, MessageSquare, ShieldAlert
 } from 'lucide-react';
 
@@ -130,16 +130,16 @@ export const EmployeeDashboard = () => {
         <div className="lg:col-span-2 space-y-6">
           <Card className="p-6 border-indigo-100 dark:border-indigo-900/30 bg-gradient-to-br from-white to-indigo-50/20 dark:from-gray-900 dark:to-indigo-950/10 shadow-sm overflow-hidden relative">
             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-              <Brain className="w-32 h-32" />
+              <Zap className="w-32 h-32" />
             </div>
             
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2.5 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-600/20">
-                <Brain className="w-5 h-5 text-white" />
+                <Zap className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">AI Trader Copilot</h3>
-                <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-tighter">Neural Intelligence Engine</p>
+                <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">System Copilot</h3>
+                <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-tighter">Proprietary Engine Active</p>
               </div>
             </div>
 
@@ -232,19 +232,38 @@ export const EmployeeDashboard = () => {
                       <div key={c.id} className="group cursor-pointer">
                         <div className="flex items-center justify-between mb-1">
                           <p className="font-black text-xs text-gray-900 dark:text-white truncate">{c.name}</p>
-                          <Badge variant={c.risk === 'High' ? 'danger' : 'warning'} className="text-[8px] h-4">
-                            {c.risk === 'High' ? 'URGENT' : 'REVIEW'}
-                          </Badge>
+                          <div className="flex gap-1">
+                            <Badge variant={c.riskAppetite === 'High' ? 'danger' : 'warning'} className="text-[7px] h-3.5 px-1">
+                              {c.riskAppetite || 'Medium'} RISK
+                            </Badge>
+                            <Badge variant="outline" className="text-[7px] h-3.5 px-1 border-indigo-200 text-indigo-600">
+                              {c.preferredSpecialization || 'Equity'}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mb-2 text-[9px] font-bold text-gray-400">
+                          <span>Complexity: {c.complexity || 5}/10</span>
+                          <span>•</span>
+                          <span>Rating: {(c.feedback || 0)}.0☆</span>
                         </div>
                         <div className="flex items-center gap-2 mb-2">
                           <div className="flex-1 bg-gray-100 dark:bg-gray-800 h-1 rounded-full overflow-hidden">
-                            <div className={`h-full ${c.risk === 'High' ? 'bg-red-500' : 'bg-yellow-500'}`} style={{ width: c.risk === 'High' ? '90%' : '60%' }} />
+                            <div className={`h-full ${c.riskAppetite === 'High' ? 'bg-red-500' : 'bg-yellow-500'}`} style={{ width: c.riskAppetite === 'High' ? '90%' : '60%' }} />
                           </div>
-                          <span className="text-[9px] font-black text-gray-400">{(c.feedback || 0)}.0☆</span>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full h-7 text-[9px] font-black border border-gray-100 dark:border-gray-800 hover:bg-red-50 hover:text-red-600 hover:border-red-100 uppercase tracking-tighter" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`Disconnect from ${c.name}? This will return them to the matching pool.`)) {
+                                unassignCustomerTrader(user.token, c.id).then(() => window.location.reload());
+                              }
+                            }}
+                          >
+                            Disconnect Partnership
+                          </Button>
                         </div>
-                        <Button variant="ghost" size="sm" className="w-full h-7 text-[9px] font-black border border-gray-100 dark:border-gray-800 hover:bg-gray-50 uppercase tracking-tighter" onClick={() => navigate('/employee/customers')}>
-                          Initialize Mitigation Plan
-                        </Button>
                       </div>
                     ))
                 ) : (

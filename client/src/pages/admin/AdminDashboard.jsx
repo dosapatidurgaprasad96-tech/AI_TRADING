@@ -5,13 +5,13 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Ca
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import {
-  Users, BrainCircuit, Activity, TrendingUp, TrendingDown,
+  Users, Activity, TrendingUp, TrendingDown,
   DollarSign, Shield, AlertTriangle, CheckCircle, ArrowUpRight,
   BarChart3, Zap, Target, Star, Clock, ChevronRight, RefreshCw
 } from 'lucide-react';
 
 const SYSTEM_EVENTS = [
-  { id: 1, text: 'AI re-matched 2 clients after risk profile update', time: '2m ago', type: 'ai' },
+  { id: 1, text: 'System re-matched 2 clients after profile update', time: '2m ago', type: 'system' },
   { id: 2, text: 'New customer "Jordan Price" registered', time: '14m ago', type: 'user' },
   { id: 3, text: 'High-risk alert triggered on customer C4', time: '1h ago', type: 'alert' },
   { id: 4, text: 'Monthly analytics report generated', time: '3h ago', type: 'report' },
@@ -41,7 +41,7 @@ export const AdminDashboard = () => {
     setProcessStage('Calculating matching nodes...');
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    setProcessStage('Executing AI assignment...');
+    setProcessStage('Executing system assignment...');
     await simulateAIAssignment();
     
     setProcessStage('Finalizing pairings...');
@@ -65,9 +65,9 @@ export const AdminDashboard = () => {
             <div className="relative mb-6">
               <div className="w-20 h-20 border-4 border-indigo-100 dark:border-indigo-900 rounded-full" />
               <div className="w-20 h-20 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin absolute inset-0" />
-              <BrainCircuit className="w-8 h-8 text-indigo-600 absolute inset-0 m-auto animate-pulse" />
+              <Zap className="w-8 h-8 text-indigo-600 absolute inset-0 m-auto animate-pulse" />
             </div>
-            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">Neural Engine Active</h3>
+            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">System Engine Active</h3>
             <p className="text-indigo-600 dark:text-indigo-400 font-bold text-sm h-10 flex items-center justify-center">
               {processStage}
             </p>
@@ -95,7 +95,7 @@ export const AdminDashboard = () => {
               className="bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur text-white font-semibold min-w-[140px]"
             >
               <RefreshCw className={`w-4 h-4 mr-2 ${running ? 'animate-spin' : ''}`} />
-              {running ? 'Processing...' : 'Run AI Match'}
+              {running ? 'Processing...' : 'Run System Match'}
             </Button>
             <Button
               onClick={() => navigate('/admin/analytics')}
@@ -111,7 +111,7 @@ export const AdminDashboard = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Total Users', value: totalUsers, sub: `${employees.length} traders · ${customers.length} clients`, icon: Users, color: 'indigo', path: '/admin/users' },
-          { label: 'AI Matched', value: assignedCount, sub: `${customers.length - assignedCount} unmatched`, icon: BrainCircuit, color: 'green', path: '/admin/ai-assignment' },
+          { label: 'System Matched', value: assignedCount, sub: `${customers.length - assignedCount} unmatched`, icon: Zap, color: 'green', path: '/admin/ai-assignment' },
           { label: 'High Risk Clients', value: highRiskCount, sub: 'Require priority attention', icon: AlertTriangle, color: 'red', path: '/admin/users' },
           { label: 'Avg Success Rate', value: `${avgSuccessRate}%`, sub: 'Across all traders', icon: Target, color: 'purple', path: '/admin/analytics' },
         ].map(({ label, value, sub, icon: Icon, color, path }) => (
@@ -191,34 +191,38 @@ export const AdminDashboard = () => {
 
         {/* System Events */}
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
             <CardTitle className="text-sm flex items-center gap-2">
-              <Activity className="w-4 h-4 text-indigo-500" /> System Events
+              <Activity className="w-4 h-4 text-indigo-500" /> Recent Global Trades
             </CardTitle>
+            <Badge variant="outline" className="text-[10px]">{trades.length} Operations</Badge>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {SYSTEM_EVENTS.map(evt => (
-                <div key={evt.id} className="flex items-start gap-2.5">
-                  <div className={`mt-0.5 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    evt.type === 'ai' ? 'bg-purple-50 text-purple-500 dark:bg-purple-500/10' :
-                    evt.type === 'alert' ? 'bg-red-50 text-red-500 dark:bg-red-500/10' :
-                    evt.type === 'report' ? 'bg-blue-50 text-blue-500 dark:bg-blue-500/10' :
-                    'bg-green-50 text-green-500 dark:bg-green-500/10'
-                  }`}>
-                    {evt.type === 'ai' && <BrainCircuit className="w-3 h-3" />}
-                    {evt.type === 'alert' && <AlertTriangle className="w-3 h-3" />}
-                    {evt.type === 'report' && <BarChart3 className="w-3 h-3" />}
-                    {evt.type === 'user' && <CheckCircle className="w-3 h-3" />}
+            <div className="space-y-4">
+              {trades.length > 0 ? (
+                trades.slice(0, 5).map(trade => (
+                  <div key={trade.id} className="flex items-center justify-between border-b border-gray-50 dark:border-gray-800 pb-3 last:border-none last:pb-0">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-[10px] ${trade.type === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {trade.type.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-xs font-black text-gray-900 dark:text-white leading-none mb-1">{trade.symbol}</p>
+                        <p className="text-[9px] text-gray-400 font-bold uppercase">{trade.customerName || 'Anonymous'}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-black text-gray-900 dark:text-white leading-none mb-1">${trade.amount.toLocaleString()}</p>
+                      <p className="text-[9px] text-gray-400 font-medium">{trade.date}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">{evt.text}</p>
-                    <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
-                      <Clock className="w-2.5 h-2.5" /> {evt.time}
-                    </p>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-6">
+                  <Clock className="w-6 h-6 text-gray-200 mx-auto mb-2" />
+                  <p className="text-[10px] font-bold text-gray-400 uppercase">No Recent Activity</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -231,7 +235,7 @@ export const AdminDashboard = () => {
             <Shield className="w-5 h-5 text-indigo-500" /> Client Risk Distribution
           </CardTitle>
           <Button variant="ghost" className="text-xs h-8 px-3" onClick={() => navigate('/admin/ai-assignment')}>
-            AI Assignments →
+            System Assignments →
           </Button>
         </CardHeader>
         <CardContent>
@@ -266,7 +270,7 @@ export const AdminDashboard = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: 'Manage Users', sub: 'Edit roles, traders & clients', path: '/admin/users', icon: Users },
-          { label: 'AI Assignment Engine', sub: 'View and retrigger AI matching', path: '/admin/ai-assignment', icon: BrainCircuit },
+          { label: 'System Engine', sub: 'View and retrigger assignments', path: '/admin/ai-assignment', icon: Zap },
           { label: 'System Analytics', sub: 'Charts, KPIs, and performance', path: '/admin/analytics', icon: BarChart3 },
         ].map(({ label, sub, path, icon: Icon }) => (
           <button
