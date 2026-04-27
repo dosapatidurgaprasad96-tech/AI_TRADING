@@ -33,6 +33,7 @@ The primary interface for retail investors, designed for high-end usability and 
 - **Paper Trading Engine**: Execute orders on a zero-risk simulated market. Track your net worth and profit margins through a glassmorphic command center.
 - **Dynamic Profile DNA**: Customers define their Risk Appetite, Market Specialization, and Complexity requirements, which drive the matching logic.
 - **Instant Service Feedback**: Rate your assigned trader's performance. The system uses this feedback to re-calculate trader "Success Scores" in real-time.
+- **Google OAuth**: Fast, secure 1-click registration and login for retail investors.
 
 ### 🧑‍💼 2. Professional Trader (Employee) Suite
 A high-density terminal for professionals to manage their assigned client portfolios.
@@ -64,6 +65,7 @@ Trade AI utilizes a custom-built design system characterized by:
 ### Frontend
 - **React 19**: Modern component architecture with concurrent rendering support.
 - **React Markdown**: Renders rich, formatted AI match reasoning and strategy advice.
+- **Google OAuth Provider**: Integrated `@react-oauth/google` for seamless social sign-in.
 - **Lucide Icons**: Consistent, high-fidelity iconography.
 - **Tailwind CSS**: Utility-first styling with custom glassmorphic extensions.
 
@@ -71,6 +73,7 @@ Trade AI utilizes a custom-built design system characterized by:
 - **Node.js & Express**: Scalable RESTful architecture with unified error handling.
 - **Multi-Collection MongoDB**: Scalable data model with segregated `admins`, `customers`, and `traders` collections.
 - **JWT + Bcrypt**: Secure token-based auth with cross-collection identity verification.
+- **Google Auth Library**: Secure verification of Google ID tokens for seamless backend authentication.
 
 ### AI Engine
 - **System Engine**: High-parameter LLM integration via OpenRouter, delivering structured, context-aware financial strategy in Markdown.
@@ -87,6 +90,13 @@ NODE_ENV=development
 DB_URI=your_mongodb_atlas_uri
 JWT_SECRET=your_jwt_secret
 OPENROUTER_API_KEY=your_openrouter_api_key
+GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
+```
+
+Create a `.env` file in the `client/` directory:
+```env
+VITE_API_URL=http://localhost:5000/api
+VITE_GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
 ```
 
 ### 2. Installation
