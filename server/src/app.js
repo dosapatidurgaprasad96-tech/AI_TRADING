@@ -35,6 +35,7 @@ app.use(morgan('dev'));
 
 // Routing
 app.get('/', (req, res) => res.status(200).send('API is running...'));
+app.get('/health', (req, res) => res.status(200).json({ status: 'OK', timestamp: new Date() }));
 app.use('/api', routes);
 
 // Error Handling
